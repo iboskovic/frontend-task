@@ -1,10 +1,16 @@
 import { ChangeEvent, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import styled from "styled-components";
 import toastService from "../../../services/toastService";
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import { SortDirection } from "../lookups/sortDirection";
 import { IPlayer } from "../players/interfaces/IPlayer";
-import { setPlayers } from "../players/slices/playerSlice";
+import {
+  setPlayers,
+  setUserId,
+  resetUserId,
+} from "../players/slices/playerSlice";
+import PlayerDetails from "./PlayerDetails";
 
 const ACCESS_TOKEN = `wO9AhZ3Ig3-aFGAJ3SEj1vtKJ6DuYhvnwDHTJfsQX5w`;
 const ENVIRONMENT = `master`;
@@ -21,7 +27,7 @@ const colorError = "#ED4337";
 const MainScreen = () => {
   const dispatch = useAppDispatch();
   const state = useAppSelector((state) => state.players);
-  const players = state;
+  const { items, userId } = state;
   const [filter, setFilter] = useState<string>("");
   const [limit, setLimit] = useState<number>(10);
   const [sorter, setSorter] = useState<any>(null);
@@ -70,6 +76,15 @@ const MainScreen = () => {
     setSorter(e.target.value);
   };
 
+  const goToPlayerDetails = (userId: number) => {
+    dispatch(setUserId(userId));
+    // history.push(`details${userId}`);
+  };
+
+  const handleResetPlayer = () => {
+    dispatch(setUserId(0));
+  };
+
   useEffect(() => {
     fetch(endpoint, {
       method: "POST",
@@ -91,10 +106,25 @@ const MainScreen = () => {
       });
   }, [limit, sorter]);
 
+  useEffect(() => {
+    userId !== 1 && userId !== 0
+      ? toastService.error("Details for this player do not exist.")
+      : "";
+  }, [userId]);
+
   return (
     <>
       <Nav>
-        <TextPrimary>Home</TextPrimary>
+        {userId === 0 ? (
+          <TextPrimary>Home</TextPrimary>
+        ) : (
+          <TextPrimary
+            onClick={() => handleResetPlayer()}
+            style={{ cursor: "pointer" }}
+          >
+            Back
+          </TextPrimary>
+        )}
         <div
           style={{
             display: "flex",
@@ -102,78 +132,99 @@ const MainScreen = () => {
             alignItems: "center",
           }}
         >
-          <div style={{ marginRight: "4px", color: `${white}` }}>Sort by:</div>
-          <InputSelect
-            placeholder="Sort by"
-            onChange={(e) => handleSelectSort(e)}
-          >
-            <option value={`${SortDirection.None}`}>None</option>
-            <option value={`${SortDirection.Asc}`}>A-Z</option>
-            <option value={`${SortDirection.Desc}`}>Z-A</option>
-          </InputSelect>
-          <Field>
-            <Input
-              type="text"
-              placeholder="Search player"
-              onChange={handleFilter}
-              value={filter}
-            />
-            <InputIcon
-              className="fas fa-times"
-              onClick={() => setFilter("")}
-            ></InputIcon>
-          </Field>
-          <Button>
-            Add player{" "}
-            <Icon className="fas fa-plus" style={{ color: "white" }}></Icon>
-          </Button>
+          {userId === 0 ? (
+            <>
+              <div style={{ marginRight: "4px", color: `${white}` }}>
+                Sort by:
+              </div>
+              <InputSelect
+                placeholder="Sort by"
+                onChange={(e) => handleSelectSort(e)}
+              >
+                <option value={`${SortDirection.None}`}>None</option>
+                <option value={`${SortDirection.Asc}`}>A-Z</option>
+                <option value={`${SortDirection.Desc}`}>Z-A</option>
+              </InputSelect>
+              <Field>
+                <Input
+                  type="text"
+                  placeholder="Search player"
+                  onChange={handleFilter}
+                  value={filter}
+                />
+                <InputIcon
+                  className="fas fa-times"
+                  onClick={() => setFilter("")}
+                ></InputIcon>
+              </Field>
+              <Button disabled={userId === 0 ? false : true}>
+                Add player{" "}
+                <Icon className="fas fa-plus" style={{ color: "white" }}></Icon>
+              </Button>
+            </>
+          ) : (
+            <></>
+          )}
         </div>
       </Nav>
 
-      {loading ? (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "80px",
-          }}
-        >
-          Loading...
-        </div>
-      ) : (
-        <Main>
-          <Flex>
-            <Content>
-              {players.items.filter(filterByName).map((x: IPlayer) => (
-                <Card>
-                  <CardImage src={x.photo.url} />
-                  <CardFooter>
-                    <CardFooterImage src={x.photo.url} />
-                    <CardFooterPlayer>
-                      <CardFooterName>{x.name}</CardFooterName>
-                      <CardFooterPosition>{x.position}</CardFooterPosition>
-                    </CardFooterPlayer>
-                  </CardFooter>
-                </Card>
-              ))}
-            </Content>
-            {filter.length > 0 ? (
-              <></>
-            ) : (
-              // inline styling for utils reason because not all FlexRows will have the same margin
-              <FlexRow style={{ marginTop: "16px" }}>
-                <Button onClick={() => handleShowMore(6)}>Show More</Button>
-                {limit > 10 ? (
-                  <ButtonLess onClick={() => handleShowLess(6)}>
-                    Show Less
-                  </ButtonLess>
-                ) : (
+      {userId !== 1 && userId !== 0 ? (
+        <Flex style={{ marginTop: "150px" }}>
+          Sorry the details for your selected player do not exist. Try selecting
+          Danil Ishutin.
+        </Flex>
+      ) : userId === 1 ? (
+        <PlayerDetails />
+      ) : userId === 0 ? (
+        <>
+          {loading ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "80px",
+              }}
+            >
+              Loading...
+            </div>
+          ) : (
+            <Main>
+              <Flex>
+                <Content>
+                  {items.filter(filterByName).map((x: IPlayer) => (
+                    <Card onClick={() => goToPlayerDetails(x.id)} key={x.id}>
+                      <CardImage src={x.photo.url} />
+                      <CardFooter>
+                        <CardFooterImage src={x.photo.url} />
+                        <CardFooterPlayer>
+                          <CardFooterName>{x.name}</CardFooterName>
+                          <CardFooterPosition>{x.position}</CardFooterPosition>
+                        </CardFooterPlayer>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                </Content>
+                {filter.length > 0 ? (
                   <></>
+                ) : (
+                  // inline styling for utils reason because not all FlexRows will have the same margin
+                  <FlexRow style={{ marginTop: "16px" }}>
+                    <Button onClick={() => handleShowMore(6)}>Show More</Button>
+                    {limit > 10 ? (
+                      <ButtonLess onClick={() => handleShowLess(6)}>
+                        Show Less
+                      </ButtonLess>
+                    ) : (
+                      <></>
+                    )}
+                  </FlexRow>
                 )}
-              </FlexRow>
-            )}
-          </Flex>
-        </Main>
+              </Flex>
+            </Main>
+          )}
+        </>
+      ) : (
+        <></>
       )}
     </>
   );
@@ -185,6 +236,7 @@ const Nav = styled.nav`
   justify-content: space-between;
   align-items: center;
   padding: 10px;
+  height: 45px;
 `;
 
 const Content = styled.section`

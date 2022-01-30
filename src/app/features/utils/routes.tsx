@@ -1,10 +1,11 @@
 import { Switch } from "react-router-dom";
 import { Route } from "react-router-dom";
 import MainScreen from "../pages/MainScreen";
+import PlayerDetails from "../pages/PlayerDetails";
 
 export enum PATHS {
   MAIN_SCREEN = "/",
-  USER_PREVIEW = ":userId",
+  PLAYER_DETAILS = "/details:userId",
 }
 
 const ROUTES: any = [
@@ -14,6 +15,13 @@ const ROUTES: any = [
     exact: true,
     isPublic: true,
     component: () => <MainScreen />,
+  },
+  {
+    path: PATHS.PLAYER_DETAILS,
+    key: "PLAYER_DETAILS",
+    exact: true,
+    isPublic: true,
+    component: () => <PlayerDetails />,
   },
 ];
 
