@@ -8,6 +8,7 @@ module.exports = {
   },
   devServer: {
     hot: "only",
+    historyApiFallback: true,
   },
   module: {
     rules: [

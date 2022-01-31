@@ -1,14 +1,23 @@
 import { Switch } from "react-router-dom";
 import { Route } from "react-router-dom";
+import AddPlayer from "../pages/AddPlayer";
 import MainScreen from "../pages/MainScreen";
 import PlayerDetails from "../pages/PlayerDetails";
 
 export enum PATHS {
   MAIN_SCREEN = "/",
-  PLAYER_DETAILS = "/details:userId",
+  PLAYER_DETAILS = "/:userId",
+  ADD_PLAYER = "/addnew",
 }
 
 const ROUTES: any = [
+  {
+    path: PATHS.ADD_PLAYER,
+    key: "ADD_PLAYER",
+    exact: true,
+    isPublic: true,
+    component: () => <AddPlayer />,
+  },
   {
     path: PATHS.MAIN_SCREEN,
     key: "MAIN_SCREEN",

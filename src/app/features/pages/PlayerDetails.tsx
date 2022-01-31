@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import toastService from "../../../services/toastService";
 import { useAppDispatch, useAppSelector } from "../../hooks";
-import IParams from "../interfaces/IParams";
+import Nav from "../components/Nav";
 import { IPlayer } from "../players/interfaces/IPlayer";
-import { setPlayer } from "../players/slices/playerSlice";
 
 const ACCESS_TOKEN = `wO9AhZ3Ig3-aFGAJ3SEj1vtKJ6DuYhvnwDHTJfsQX5w`;
 const ENVIRONMENT = `master`;
@@ -13,7 +11,6 @@ const SPACE_ID = `ojpqlra32uom`;
 const endpoint = `https://graphql.contentful.com/content/v1/spaces/${SPACE_ID}/environments/${ENVIRONMENT}`;
 
 const PlayerDetails = () => {
-  const dispatch = useAppDispatch();
   const state = useAppSelector((state) => state.players);
   const { userId, player } = state;
   const [currentPlayer, setCurrentPlayer] = useState<IPlayer[]>([]);
@@ -54,18 +51,52 @@ const PlayerDetails = () => {
       });
   }, [userId]);
 
+  useEffect(() => {
+    userId !== 1 && userId !== 0
+      ? toastService.error("Details for this player do not exist.")
+      : "";
+  }, [userId]);
+
   return (
     <div>
-      {currentPlayer.length > 0 ? (
-        currentPlayer.map((x) => (
-          <Details key={x.id}>
-            <DetailsImage src={x.photo.url} />
-            <DetailsName>{x.name}</DetailsName>
-            <DetailsPosition>{x.position}</DetailsPosition>
-          </Details>
-        ))
+      <Nav />
+      {userId !== 1 && userId !== 0 ? (
+        <Flex style={{ marginTop: "150px" }}>
+          Sorry the details for your selected player do not exist. Try selecting
+          Danil Ishutin.
+        </Flex>
+      ) : userId === 1 ? (
+        <>
+          {currentPlayer.length > 0 ? (
+            currentPlayer.map((x) => (
+              <Details key={x.id}>
+                <DetailsImage src={x.photo.url} />
+                <DetailsName>{x.name}</DetailsName>
+                <DetailsPosition>{x.position}</DetailsPosition>
+              </Details>
+            ))
+          ) : (
+            <>Empty</>
+          )}
+        </>
+      ) : userId === 0 ? (
+        <>
+          {loading ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "80px",
+              }}
+            >
+              Loading...
+            </div>
+          ) : (
+            <></>
+          )}
+        </>
       ) : (
-        <>Empty</>
+        <></>
       )}
     </div>
   );
@@ -89,6 +120,13 @@ const DetailsName = styled.div`
 const DetailsPosition = styled.div`
   font-size: 18px;
   opacity: 0.5;
+`;
+
+const Flex = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 `;
 
 export default PlayerDetails;

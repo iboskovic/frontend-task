@@ -19,17 +19,19 @@ import {
 import { setupListeners } from "@reduxjs/toolkit/dist/query";
 import { rtkQueryErrorLogger } from "./features/middleware/rtkQueryErrorLogger";
 import playerReducer from "./features/players/slices/playerSlice";
+import addPlayerReducer from "./features/players/slices/addPlayerSlice";
 
 const persistConfig = {
   key: "root",
   version: 1,
   storage,
-  whitelist: ["players"],
+  whitelist: ["players", "addPlayer"],
 };
 
 const rootReducer = combineReducers({
   [baseService.reducerPath]: baseService.reducer,
   players: playerReducer,
+  addPlayer: addPlayerReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
