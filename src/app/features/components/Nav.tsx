@@ -1,8 +1,15 @@
 import { useHistory } from "react-router-dom";
 import styled from "styled-components";
 import { useAppDispatch } from "../../hooks";
-import { colorPrimary, white } from "../pages/MainScreen";
+import {
+  colorBtnPrimary,
+  colorPrimary,
+  fontBebas,
+  fontPoppins,
+  white,
+} from "../pages/MainScreen";
 import { setUserId } from "../players/slices/playerSlice";
+import logoImg from "../../../assets/images/logo.png";
 
 interface IProps {
   userId?: number;
@@ -13,63 +20,49 @@ const Nav: React.FC<IProps> = (props) => {
   const dispatch = useAppDispatch();
   const history = useHistory();
 
-  const handleResetPlayer = () => {
-    dispatch(setUserId(0));
-  };
-
   return (
     <Navigation>
-      {userId === 0 ? (
-        <TextPrimary>Home</TextPrimary>
-      ) : (
-        <TextPrimary
-          onClick={() => {
-            handleResetPlayer;
-            history.push("/");
-          }}
-          style={{ cursor: "pointer" }}
-        >
-          Back
-        </TextPrimary>
-      )}
+      <img src={logoImg} alt="logo" />
+      <NavLink onClick={() => (userId !== 0 ? history.push("/") : null)}>
+        Home
+      </NavLink>
       <Button
         disabled={userId === 0 ? false : true}
         onClick={() => history.push("/addnew")}
       >
-        Add player{" "}
-        <Icon className="fas fa-plus" style={{ color: "white" }}></Icon>
+        Add player
       </Button>
     </Navigation>
   );
 };
 
 const Navigation = styled.nav`
+  padding: 8px 165px;
   background-color: ${colorPrimary};
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  height: 45px;
 `;
 
-const TextPrimary = styled.div`
+const NavLink = styled.div`
   color: ${white};
-`;
-
-const Icon = styled.i`
+  font-weight: 400;
+  font-size: 24px;
+  font-family: ${fontBebas};
   cursor: pointer;
-  vertical-align: middle;
 `;
 
 const Button = styled.button`
-  padding: 8px 24px;
-  background-color: ${colorPrimary};
-  color: ${white};
-  font-weight: 700;
-  align-self: center;
+  padding: 12px 24px;
+  background: ${colorBtnPrimary};
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
+  font-family: ${fontPoppins}
+  font-weight: 400;
+  &:hover {
+      opacity: 0.7
+  };
 `;
 
 export default Nav;

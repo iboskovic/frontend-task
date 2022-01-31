@@ -1,9 +1,17 @@
 import { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import styled from "styled-components";
 import toastService from "../../../services/toastService";
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import Nav from "../components/Nav";
 import { IPlayer } from "../players/interfaces/IPlayer";
+import {
+  colorBtnPrimary,
+  colorPrimary,
+  fontBebas,
+  fontPoppins,
+  white,
+} from "./MainScreen";
 
 const ACCESS_TOKEN = `wO9AhZ3Ig3-aFGAJ3SEj1vtKJ6DuYhvnwDHTJfsQX5w`;
 const ENVIRONMENT = `master`;
@@ -11,6 +19,7 @@ const SPACE_ID = `ojpqlra32uom`;
 const endpoint = `https://graphql.contentful.com/content/v1/spaces/${SPACE_ID}/environments/${ENVIRONMENT}`;
 
 const PlayerDetails = () => {
+  const history = useHistory();
   const state = useAppSelector((state) => state.players);
   const { userId, player } = state;
   const [currentPlayer, setCurrentPlayer] = useState<IPlayer[]>([]);
@@ -25,6 +34,9 @@ const PlayerDetails = () => {
         name
         position
         photo {
+          url
+        }
+        countryFlag {
           url
         }
       }
@@ -60,19 +72,27 @@ const PlayerDetails = () => {
   return (
     <div>
       <Nav />
+      <Button onClick={() => history.push("/")}>Back</Button>
       {userId !== 1 && userId !== 0 ? (
-        <Flex style={{ marginTop: "150px" }}>
-          Sorry the details for your selected player do not exist. Try selecting
-          Danil Ishutin.
+        <Flex>
+          <NotFoundTxt>404</NotFoundTxt>
+          <PlayerNotFound>Player not found</PlayerNotFound>
         </Flex>
       ) : userId === 1 ? (
         <>
           {currentPlayer.length > 0 ? (
             currentPlayer.map((x) => (
               <Details key={x.id}>
-                <DetailsImage src={x.photo.url} />
-                <DetailsName>{x.name}</DetailsName>
-                <DetailsPosition>{x.position}</DetailsPosition>
+                <CardImageWrapper>
+                  <CardImage src={x.photo.url} />
+                  <CardFooterImage
+                    src={x.countryFlag ? x.countryFlag.url : x.photo.url}
+                  />
+                </CardImageWrapper>
+                <CardFooter>
+                  <CardFooterName>{x.name}</CardFooterName>
+                  <CardFooterPosition>{x.position}</CardFooterPosition>
+                </CardFooter>
               </Details>
             ))
           ) : (
@@ -87,6 +107,7 @@ const PlayerDetails = () => {
                 display: "flex",
                 justifyContent: "center",
                 marginTop: "80px",
+                color: `${white}`,
               }}
             >
               Loading...
@@ -103,23 +124,9 @@ const PlayerDetails = () => {
 };
 
 const Details = styled.div`
-  padding: 40px;
-`;
-
-const DetailsImage = styled.img`
-  width: 300px;
-  height: 300px;
-  margin-bottom: 16px;
-`;
-
-const DetailsName = styled.div`
-  font-size: 32px;
-  margin-bottom: 16px;
-`;
-
-const DetailsPosition = styled.div`
-  font-size: 18px;
-  opacity: 0.5;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 `;
 
 const Flex = styled.div`
@@ -127,6 +134,87 @@ const Flex = styled.div`
   justify-content: center;
   flex-direction: column;
   align-items: center;
+`;
+
+const CardImage = styled.img`
+  width: 207px;
+  height: 207px;
+  border-radius: 1000px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  object-fit: cover;
+  border: 2px solid #fbd300;
+  margin-bottom: 16px;
+`;
+
+const CardImageWrapper = styled.div`
+  position: relative;
+  align-self: center;
+`;
+
+const CardFooterImage = styled.img`
+  width: 60px;
+  height: 60px;
+  bottom: 20px;
+  right: 0;
+  border-radius: 1000px;
+  border: 1px solid ${white};
+  position: absolute;
+`;
+const CardFooter = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+`;
+
+const CardFooterName = styled.div`
+  font-family: ${fontBebas};
+  font-size: 32px;
+  color: ${white};
+  font-weight: 400;
+`;
+
+const CardFooterPosition = styled.div`
+  font-family: ${fontPoppins};
+  font-size: 16px;
+  font-weight: 400;
+  color: ${white};
+  opacity: 0.7;
+`;
+
+const Button = styled.button`
+  padding: 12px 24px;
+  background: transparent;
+  border: 2px solid #fbd300;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: ${fontPoppins}
+  font-weight: 400;
+  &:hover {
+      opacity: 0.7
+  }
+  margin-top: 80px;
+  margin-bottom: 80px;
+  margin-left: 165px;
+  color: #fbd300;
+`;
+
+const NotFoundTxt = styled.div`
+  font-family: ${fontBebas};
+  font-size: 240px;
+  font-weight: 400;
+  color: ${white};
+  opacity: 0.5;
+`;
+
+const PlayerNotFound = styled.div`
+  font-family: ${fontBebas};
+  font-size: 160px;
+  font-weight: 400;
+  color: ${white};
+  opacity: 0.2;
 `;
 
 export default PlayerDetails;
